@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>DEAD ZONE</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- LOBBY -->
+<div id="lobby">
+  <h1>DEAD ZONE</h1>
+  <h2>CO-OP ZOMBIE SURVIVAL · MAX 4</h2>
+  <div id="pb-lbl">CONNESSIONE...</div>
+  <div id="pb-wrap"><div id="pb"></div></div>
+  <div class="panels">
+    <div class="panel">
+      <h3>SOLO / HOST</h3>
+      <input id="hn" placeholder="Il tuo nome" maxlength="12">
+      <button class="btn" id="bsolo">▶ GIOCA IN SOLO</button>
+      <div style="border-top:1px solid #1a1a1a;padding-top:8px;display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-b" id="bhost">+ CREA STANZA MULTIPLAYER</button>
+        <div id="rc"></div>
+        <div id="cl-wrap" style="display:none"><button class="btn btn-g" id="bcopy">📋 COPIA LINK INVITO</button></div>
+        <button class="btn btn-b" id="bstart" style="display:none">▶ INIZIA (1/4)</button>
+      </div>
+      <div class="st" id="sh"></div>
+    </div>
+    <div class="panel">
+      <h3>UNISCITI</h3>
+      <input id="jn" placeholder="Il tuo nome" maxlength="12">
+      <input id="jc" placeholder="Codice stanza" maxlength="6" style="text-transform:uppercase">
+      <button class="btn" id="bjoin">→ ENTRA</button>
+      <div class="st" id="sj"></div>
+    </div>
+    <div class="panel" style="min-width:200px">
+      <h3>IMPOSTAZIONI</h3>
+      <button class="btn btn-d" id="lobby-opt-btn">⚙ OPZIONI</button>
+      <button class="btn btn-d" id="lobby-stereo-btn">🎵 STEREO</button>
+      <div style="font-size:9px;color:#252525;line-height:1.9;margin-top:4px">P1=ROSSO · P2=VERDE<br>P3=BLU · P4=GIALLO</div>
+    </div>
+  </div>
+  <div id="hint">WASD/FRECCE=muovi · MOUSE=mira · CLICK=spara · R=ricarica · Q=compra · F=raccogli · 1=reset · ESC=pausa · M=stereo</div>
+</div>
+
+<!-- OPTIONS MODAL -->
+<div class="modal" id="opt-modal">
+  <div class="mbox">
+    <h2>⚙ OPZIONI</h2>
+    <div class="opt-sec">AUDIO</div>
+    <div class="opt-row"><label>Volume generale</label><input type="range" id="omv" min="0" max="100" value="80"><span id="lmv">80</span></div>
+    <div class="opt-row"><label>Volume musica</label><input type="range" id="omm" min="0" max="100" value="60"><span id="lmm">60</span></div>
+    <div class="opt-sec">CONTROLLI</div>
+    <div class="opt-row"><label>Sensibilità mouse</label><input type="range" id="osens" min="1" max="10" value="5"><span id="lsens">5</span></div>
+    <div class="opt-sec">TASTI</div>
+    <div class="key-grid">
+      <div class="ki"><span>Muovi</span><span>WASD/↑↓←→</span></div>
+      <div class="ki"><span>Mira</span><span>MOUSE</span></div>
+      <div class="ki"><span>Spara</span><span>CLICK SX</span></div>
+      <div class="ki"><span>Ricarica</span><span>R</span></div>
+      <div class="ki"><span>Compra arma</span><span>Q</span></div>
+      <div class="ki"><span>Raccogli</span><span>F</span></div>
+      <div class="ki"><span>Reset pos.</span><span>1</span></div>
+      <div class="ki"><span>Pausa</span><span>ESC</span></div>
+      <div class="ki"><span>Stereo</span><span>M</span></div>
+    </div>
+    <button class="btn" id="opt-close-btn">CHIUDI</button>
+  </div>
+</div>
+
+<!-- PAUSE MODAL -->
+<div class="modal" id="pause-modal">
+  <div class="mbox" style="align-items:center">
+    <h2>⏸ PAUSA</h2>
+    <button class="btn" style="width:210px" id="pause-resume-btn">▶ RIPRENDI</button>
+    <button class="btn btn-d" style="width:210px" id="pause-opt-btn">⚙ OPZIONI</button>
+    <button class="btn btn-d" style="width:210px" id="pause-stereo-btn">🎵 STEREO</button>
+    <button class="btn" style="width:210px;background:#4a0000;margin-top:4px" id="pause-abandon-btn">✕ ABBANDONA</button>
+  </div>
+</div>
+
+<!-- ABANDON CONFIRM -->
+<div class="modal" id="abandon-modal">
+  <div class="mbox" style="align-items:center">
+    <h2 style="color:#ff4444">ABBANDONA?</h2>
+    <p style="font-size:10px;color:#555;letter-spacing:1px;text-align:center">I progressi andranno persi.</p>
+    <div style="display:flex;gap:10px;width:100%">
+      <button class="btn btn-d" style="flex:1" id="abandon-no-btn">NO</button>
+      <button class="btn" style="flex:1;background:#8B0000" id="abandon-yes-btn">SÌ, ESCI</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEREO -->
+<div id="stereo">
+  <h4>🎵 STEREO <button id="stereo-close-btn">✕</button></h4>
+  <div id="st-name">Nessuna traccia</div>
+  <div id="st-ctrls">
+    <button id="st-prev">⏮</button>
+    <button id="st-play">▶</button>
+    <button id="st-next">⏭</button>
+    <button id="st-shuf">🔀</button>
+  </div>
+  <div class="st-vrow"><span>🔊</span><input type="range" id="st-vol" min="0" max="100" value="60"><span id="st-vl">60</span></div>
+  <div id="st-list"></div>
+  <label id="st-upload">+ AGGIUNGI MUSICA<input type="file" id="st-file" accept="audio/*" multiple></label>
+</div>
+
+<!-- CANVAS -->
+<canvas id="cv"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="hud-top">
+    <div><div id="wlbl">WAVE 1</div><div id="btlbl"></div></div>
+    <div id="hud-btns">
+      <button class="hbtn" id="hud-pause-btn">⏸ ESC</button>
+      <button class="hbtn" id="hud-stereo-btn">🎵</button>
+    </div>
+    <div id="ptlbl">0 PTS</div>
+  </div>
+  <div id="hpbars"></div>
+  <canvas id="mmcv" width="150" height="150"></canvas>
+  <div id="ammo">
+    <div class="wn" id="wn">PISTOLA</div>
+    <div class="ac" id="ac">12</div>
+    <div class="ar" id="ar">/ 12 · RISERVA: 60</div>
+    <div class="rb-w"><div class="rb" id="rb"></div></div>
+  </div>
+  <div id="lives"></div>
+  <div id="kf"></div>
+  <div id="prkd"></div>
+  <div id="ann"></div>
+  <div id="msg"></div>
+  <div id="dmg"></div>
+  <div id="resp"><div id="resp-box"><p id="resp-p">SEI MORTO</p><small id="resp-s">Respawn tra 3s...</small></div></div>
+</div>
+
+<!-- GAME OVER -->
+<div id="go">
+  <h1>GAME OVER</h1>
+  <p id="go-w"></p><p id="go-p"></p>
+  <button class="btn" style="width:200px;margin-top:8px" id="go-replay-btn">↺ RIGIOCA</button>
+</div>
+
+<!-- TOUCH -->
+<div id="touch">
+  <div id="jlz">
+    <div class="jbase" id="jlb"></div>
+    <div class="jknob" id="jlk"></div>
+  </div>
+  <div id="jrz">
+    <div class="jbase" id="jrb"></div>
+    <div class="jknob" id="jrk"></div>
+  </div>
+  <div id="tbtns">
+    <div style="display:flex;gap:8px">
+      <div class="tbtn" id="tbr">R<br>RELOAD</div>
+      <div class="tbtn" id="tbq">Q<br>BUY</div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

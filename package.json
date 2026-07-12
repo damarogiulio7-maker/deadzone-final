@@ -1,0 +1,17 @@
+{
+  "name": "deadzone",
+  "version": "1.0.0",
+  "description": "DEAD ZONE - co-op zombie survival, server-authoritative multiplayer",
+  "type": "module",
+  "private": true,
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
