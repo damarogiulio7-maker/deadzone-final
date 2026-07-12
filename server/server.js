@@ -52,7 +52,10 @@ function serveStatic(req, res) {
 }
 
 const server = http.createServer(serveStatic);
-const wss = new WebSocketServer({ server });
+// maxPayload caps a single WS frame well above anything our protocol ever
+// sends (largest legitimate message is a full room state broadcast), so a
+// client can't force the process to buffer an arbitrarily large message.
+const wss = new WebSocketServer({ server, maxPayload: 64 * 1024 });
 
 /** @type {Map<string, Room>} */
 const rooms = new Map();
@@ -125,6 +128,12 @@ wss.on('connection', ws => {
     try { msg = JSON.parse(raw); } catch { return; }
     if (!msg || typeof msg.type !== 'string') return;
 
+    // A connection may only ever belong to one room. Without this, a client
+    // (malicious or just buggy) sending repeated create/join on the same
+    // socket would orphan earlier rooms forever — close/removeClient only
+    // ever knows about whichever room `room` currently points to.
+    if (room && (msg.type === 'create' || msg.type === 'join')) return;
+
     switch (msg.type) {
       case 'create': {
         const code = genRoomCode();
@@ -168,3 +177,19 @@ wss.on('connection', ws => {
 });
 
 server.listen(PORT, () => console.log('DEAD ZONE server listening on :' + PORT));
+
+// Most hosts (Render, Railway, Fly, Docker/k8s...) send SIGTERM before
+// killing the process on redeploy — close cleanly instead of letting every
+// connected player's socket die with a raw ECONNRESET.
+function shutdown() {
+  console.log('Shutting down...');
+  for (const room of rooms.values()) {
+    if (room.interval) clearInterval(room.interval);
+    room.broadcast({ type: 'shutdown' });
+  }
+  wss.close();
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 3000).unref();
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

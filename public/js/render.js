@@ -144,12 +144,15 @@ export function draw(gs, camX, camY, myIdx) {
     ctx.fillStyle = '#ffcc00'; ctx.font = '7px Courier New'; ctx.fillText(w.cost + ' pts [Q]', x + TILE / 2, y + TILE / 2 + 6);
   });
 
-  // Drops
+  // Drops — bob/pulse animate off the local wall clock (purely cosmetic,
+  // so every client can animate it smoothly at 60fps regardless of how
+  // often the network state actually updates).
+  const animT = Date.now() / 1000;
   gs.drops.forEach(d => {
-    const bob = Math.sin((d.bobT || 0) * 4) * 3;
+    const bob = Math.sin(animT * 4) * 3;
     const isPerk = d.type === 'perk';
     const rad = isPerk ? 22 : 14;
-    const pulse = isPerk ? (1 + Math.sin((d.bobT || 0) * 5) * .12) : 1;
+    const pulse = isPerk ? (1 + Math.sin(animT * 5) * .12) : 1;
     const color = dropColor(d), label = dropLabel(d);
     ctx.save(); ctx.translate(d.x, d.y + bob);
     if (isPerk) {

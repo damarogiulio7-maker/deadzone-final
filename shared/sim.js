@@ -22,6 +22,10 @@ export function createGameState(names) {
     spawnQ: 0, spawnT: 0,
     gameOver: false,
     events: [],
+    // Stable per-entity ids for zombies/bullets, so multiplayer clients can
+    // match entities across snapshots (needed to interpolate their motion
+    // smoothly between the server's ticks instead of rendering discrete jumps).
+    nextId: 1,
   };
 }
 
@@ -36,6 +40,12 @@ export function applyInput(player, msg) {
   player.input.dy = dy;
   player.input.angle = angle;
   player.input.firing = !!msg.firing;
+}
+
+// Shared by the server's authoritative step and the client's local movement
+// prediction (main.js), so the two can never silently diverge.
+export function playerSpeed(p) {
+  return p.speed * (p.perk === 'speed' ? 1.65 : 1);
 }
 
 // One-shot discrete actions (key press, not held state).
@@ -100,11 +110,11 @@ function respawn(p) {
 
 function spawnDrop(gs, x, y) {
   const r = Math.random();
-  if (r < 0.22) gs.drops.push({ x, y, type: 'ammo', amount: 8 + Math.floor(Math.random() * 10), bobT: 0, life: 14 });
-  else if (r < 0.36) gs.drops.push({ x, y, type: 'health', bobT: 0, life: 14 });
+  if (r < 0.22) gs.drops.push({ id: gs.nextId++, x, y, type: 'ammo', amount: 8 + Math.floor(Math.random() * 10), life: 14 });
+  else if (r < 0.36) gs.drops.push({ id: gs.nextId++, x, y, type: 'health', life: 14 });
   else if (r < 0.43) {
     const pk = ['damage', 'speed', 'nuke'][Math.floor(Math.random() * 3)];
-    gs.drops.push({ x, y, type: 'perk', perk: pk, bobT: 0, life: 18 });
+    gs.drops.push({ id: gs.nextId++, x, y, type: 'perk', perk: pk, life: 18 });
   }
 }
 
@@ -145,7 +155,7 @@ export function stepSim(gs, dt) {
     if (!p.alive) return;
 
     const inp = p.input || { dx: 0, dy: 0, angle: 0, firing: false };
-    const spd = p.speed * (p.perk === 'speed' ? 1.65 : 1);
+    const spd = playerSpeed(p);
     slide(p, inp.dx * spd * dt, inp.dy * spd * dt, 11);
     p.angle = inp.angle;
 
@@ -165,7 +175,7 @@ export function stepSim(gs, dt) {
       const dmg = w.damage * (p.perk === 'damage' ? 2 : 1);
       const spread = w.name === 'MINI UZI' ? 0.06 : 0.02;
       const ang = p.angle + (Math.random() - .5) * spread;
-      gs.bullets.push({ x: p.x, y: p.y, vx: Math.cos(ang) * w.bs, vy: Math.sin(ang) * w.bs, damage: dmg, owner: p.id, alive: true, life: 1.1, size: w.bsz, ang });
+      gs.bullets.push({ id: gs.nextId++, x: p.x, y: p.y, vx: Math.cos(ang) * w.bs, vy: Math.sin(ang) * w.bs, damage: dmg, owner: p.id, alive: true, life: 1.1, size: w.bsz, ang });
       if (p.clip === 0 && p.reserve > 0) doReload(p);
     }
 
@@ -204,7 +214,7 @@ export function stepSim(gs, dt) {
   gs.bullets = gs.bullets.filter(b => b.alive);
 
   // Drops lifecycle
-  gs.drops.forEach(d => { d.bobT = (d.bobT || 0) + dt; d.life -= dt; });
+  gs.drops.forEach(d => { d.life -= dt; });
   gs.drops = gs.drops.filter(d => d.life > 0);
 
   // Zombie AI
@@ -241,7 +251,7 @@ export function stepSim(gs, dt) {
   }
   if (!gs.between && gs.spawnQ > 0) {
     gs.spawnT -= dt;
-    if (gs.spawnT <= 0) { gs.zombies.push(makeZombie(gs.wave)); gs.spawnQ--; gs.spawnT = Math.max(.35, 1.2 - gs.wave * .06); }
+    if (gs.spawnT <= 0) { const z = makeZombie(gs.wave); z.id = gs.nextId++; gs.zombies.push(z); gs.spawnQ--; gs.spawnT = Math.max(.35, 1.2 - gs.wave * .06); }
   }
   if (!gs.between && gs.spawnQ === 0 && gs.zombLeft <= 0 && gs.zombies.every(z => !z.alive)) {
     gs.between = true; gs.betTimer = 5; gs.wave++;
