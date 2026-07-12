@@ -153,7 +153,7 @@ function beginGame() {
   predicted.inited = false;
   gameRunning = true; gamePaused = false;
   input.initTouch(() => dispatchAction('reload'), () => dispatchAction('buy'));
-  showAnn('PREPARATI!');
+  showAnn('GET READY!');
   lastT = performance.now();
   requestAnimationFrame(frame);
 }
@@ -174,11 +174,11 @@ function onResume() {
 }
 
 function connErrorBoth() {
-  showConnError('sh', 'Errore di connessione al server');
-  showConnError('sj', 'Errore di connessione al server');
+  showConnError('sh', 'Connection error');
+  showConnError('sj', 'Connection error');
 }
 function onDisconnect() {
-  if (gameRunning) { showAnn('CONNESSIONE PERSA'); gameRunning = false; }
+  if (gameRunning) { showAnn('CONNECTION LOST'); gameRunning = false; }
   else connErrorBoth();
 }
 
@@ -186,7 +186,7 @@ net.on('created', msg => { roomCode = msg.code; myIdx = msg.index; showRoomCreat
 net.on('joined', msg => { myIdx = msg.index; showJoinedStatus(); });
 net.on('error', msg => showConnError('sj', msg.msg));
 net.on('shutdown', () => {
-  if (gameRunning) { showAnn('SERVER IN RIAVVIO'); gameRunning = false; }
+  if (gameRunning) { showAnn('SERVER RESTARTING'); gameRunning = false; }
   else connErrorBoth();
 });
 net.on('playerJoined', msg => updateLobbyPlayerCount(msg.playerCount));

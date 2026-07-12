@@ -146,9 +146,9 @@ wss.on('connection', ws => {
       }
       case 'join': {
         const r = rooms.get(String(msg.code || '').toUpperCase());
-        if (!r) { ws.send(JSON.stringify({ type: 'error', msg: 'Stanza non trovata' })); return; }
-        if (r.started) { ws.send(JSON.stringify({ type: 'error', msg: 'Partita già iniziata' })); return; }
-        if (r.clients.length >= MAX_PLAYERS) { ws.send(JSON.stringify({ type: 'error', msg: 'Stanza piena' })); return; }
+        if (!r) { ws.send(JSON.stringify({ type: 'error', msg: 'Room not found' })); return; }
+        if (r.started) { ws.send(JSON.stringify({ type: 'error', msg: 'Game already started' })); return; }
+        if (r.clients.length >= MAX_PLAYERS) { ws.send(JSON.stringify({ type: 'error', msg: 'Room full' })); return; }
         room = r;
         myIndex = r.clients.length;
         const name = safeName(msg.name, 'Player');

@@ -12,7 +12,7 @@ export const PCOLORS = ['#FF3333', '#33FF66', '#3399FF', '#FFD700'];
 export const PNAMES = ['Alpha', 'Bravo', 'Charlie', 'Delta'];
 
 export const WEAPONS = [
-  { name: 'PISTOLA',   damage: 35, rpm: 210, ammo: 12, reserve: 72,  cost: 0,   bs: 540, bsz: 3   },
+  { name: 'PISTOL',    damage: 35, rpm: 210, ammo: 12, reserve: 72,  cost: 0,   bs: 540, bsz: 3   },
   { name: 'AK-47',     damage: 65, rpm: 480, ammo: 30, reserve: 150, cost: 500, bs: 650, bsz: 3.5 },
   { name: 'MINI UZI',  damage: 24, rpm: 950, ammo: 32, reserve: 192, cost: 500, bs: 560, bsz: 2.5 },
 ];

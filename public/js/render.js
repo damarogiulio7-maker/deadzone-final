@@ -242,11 +242,11 @@ export function updateHUD(gs, myIdx) {
   if (!me) return;
   const w = WEAPONS[me.wIdx];
   document.getElementById('wlbl').textContent = 'WAVE ' + gs.wave;
-  document.getElementById('btlbl').textContent = gs.between ? '⏱ PROSSIMA IN ' + Math.ceil(gs.betTimer) + 's' : 'ZOMBIE: ' + gs.zombLeft + '/' + gs.zombTotal;
+  document.getElementById('btlbl').textContent = gs.between ? '⏱ NEXT IN ' + Math.ceil(gs.betTimer) + 's' : 'ZOMBIES: ' + gs.zombLeft + '/' + gs.zombTotal;
   document.getElementById('ptlbl').textContent = me.points + ' PTS';
-  document.getElementById('wn').textContent = w.name + (me.reloading ? ' …RICARICA' : '');
+  document.getElementById('wn').textContent = w.name + (me.reloading ? ' …RELOADING' : '');
   document.getElementById('ac').textContent = me.clip;
-  document.getElementById('ar').textContent = '/ ' + w.ammo + ' · RISERVA: ' + me.reserve;
+  document.getElementById('ar').textContent = '/ ' + w.ammo + ' · RESERVE: ' + me.reserve;
   document.getElementById('rb').style.width = (me.reloading ? Math.round(me.reloadPct * 100) : 0) + '%';
 
   const hpEl = document.getElementById('hpbars');
@@ -272,13 +272,13 @@ export function updateHUD(gs, myIdx) {
     pd.style.color = c;
   } else pd.textContent = '';
 
-  document.getElementById('lives').textContent = 'VITE: ' + '♥ '.repeat(me.lives) + '♡ '.repeat(Math.max(0, MAX_LIVES - me.lives));
+  document.getElementById('lives').textContent = 'LIVES: ' + '♥ '.repeat(me.lives) + '♡ '.repeat(Math.max(0, MAX_LIVES - me.lives));
 
   const ro = document.getElementById('resp');
   if (me.isDead && me.lives > 0) {
     ro.style.display = 'flex';
-    document.getElementById('resp-p').textContent = 'SEI MORTO';
-    document.getElementById('resp-s').textContent = 'Respawn tra ' + Math.ceil(me.respTimer) + 's · Vite: ' + me.lives + '/' + MAX_LIVES;
+    document.getElementById('resp-p').textContent = 'YOU DIED';
+    document.getElementById('resp-s').textContent = 'Respawn in ' + Math.ceil(me.respTimer) + 's · Lives: ' + me.lives + '/' + MAX_LIVES;
   } else ro.style.display = 'none';
 }
 

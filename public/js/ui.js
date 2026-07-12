@@ -39,16 +39,16 @@ export function showRoomCreated(code) {
   document.getElementById('rc').style.display = 'block';
   document.getElementById('cl-wrap').style.display = 'block';
   document.getElementById('bstart').style.display = 'block';
-  setStatus('sh', 'Stanza pronta! Codice: ' + code, true);
+  setStatus('sh', 'Room ready! Code: ' + code, true);
   hideProgress();
 }
 
 export function updateLobbyPlayerCount(count) {
-  document.getElementById('bstart').textContent = '▶ INIZIA (' + count + '/4)';
+  document.getElementById('bstart').textContent = '▶ START (' + count + '/4)';
 }
 
 export function showJoinedStatus() {
-  setStatus('sj', "Connesso — aspetta l'host", true);
+  setStatus('sj', 'Connected — waiting for host', true);
   hideProgress();
 }
 
@@ -61,8 +61,8 @@ export function hideLobby() { document.getElementById('lobby').style.display = '
 export function showHud() { document.getElementById('hud').style.display = 'block'; }
 
 export function showGameOver(wave, points) {
-  document.getElementById('go-w').textContent = 'Hai resistito fino alla WAVE ' + wave;
-  document.getElementById('go-p').textContent = 'Punti totali: ' + points;
+  document.getElementById('go-w').textContent = 'You survived until WAVE ' + wave;
+  document.getElementById('go-p').textContent = 'Total points: ' + points;
   document.getElementById('go').style.display = 'flex';
 }
 
@@ -71,24 +71,24 @@ export function readRoomFromURL() {
   const r = p.get('room');
   if (!r) return;
   document.getElementById('jc').value = r.toUpperCase();
-  setStatus('sj', 'Codice dal link: ' + r.toUpperCase(), true);
+  setStatus('sj', 'Code from link: ' + r.toUpperCase(), true);
 }
 
 export function initUI(cb) {
   document.getElementById('bsolo').onclick = () => {
-    const name = document.getElementById('hn').value.trim() || 'Giulio';
-    showProgress('AVVIO...', 900, () => cb.onSolo(name));
+    const name = document.getElementById('hn').value.trim() || 'Player';
+    showProgress('STARTING...', 900, () => cb.onSolo(name));
   };
   document.getElementById('bhost').onclick = () => {
     const name = document.getElementById('hn').value.trim() || 'Host';
-    showProgress('CREAZIONE STANZA...', 1400, () => cb.onHostCreate(name));
+    showProgress('CREATING ROOM...', 1400, () => cb.onHostCreate(name));
   };
   document.getElementById('bcopy').onclick = () => {
     cb.onCopyInvite(url => {
       navigator.clipboard.writeText(url).catch(() => {}).finally(() => {
         const btn = document.getElementById('bcopy');
-        btn.textContent = '✓ COPIATO!';
-        setTimeout(() => { btn.textContent = '📋 COPIA LINK INVITO'; }, 2000);
+        btn.textContent = '✓ COPIED!';
+        setTimeout(() => { btn.textContent = '📋 COPY INVITE LINK'; }, 2000);
       });
     });
   };
@@ -96,8 +96,8 @@ export function initUI(cb) {
   document.getElementById('bjoin').onclick = () => {
     const name = document.getElementById('jn').value.trim() || 'Player';
     const code = document.getElementById('jc').value.trim().toUpperCase();
-    if (!code) { setStatus('sj', 'Inserisci il codice!', false); return; }
-    showProgress('CONNESSIONE A ' + code + '...', 1800, () => cb.onJoin(name, code));
+    if (!code) { setStatus('sj', 'Enter the code!', false); return; }
+    showProgress('CONNECTING TO ' + code + '...', 1800, () => cb.onJoin(name, code));
   };
 
   document.getElementById('lobby-opt-btn').onclick = () => showModal('opt-modal');

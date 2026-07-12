@@ -68,14 +68,14 @@ function tryBuy(gs, p) {
     const wx = (wp.tx + .5) * TILE, wy = (wp.ty + .5) * TILE;
     if (Math.hypot(p.x - wx, p.y - wy) < TILE * 1.8) {
       const w = WEAPONS[wp.wi];
-      if (p.wIdx === wp.wi) { gs.events.push({ type: 'msg', text: 'HAI GIÀ ' + w.name }); return; }
-      if (p.points < w.cost) { gs.events.push({ type: 'msg', text: 'SERVE ' + w.cost + ' PTS' }); return; }
+      if (p.wIdx === wp.wi) { gs.events.push({ type: 'msg', text: 'ALREADY HAVE ' + w.name }); return; }
+      if (p.points < w.cost) { gs.events.push({ type: 'msg', text: 'NEED ' + w.cost + ' PTS' }); return; }
       p.points -= w.cost; p.wIdx = wp.wi; p.clip = w.ammo; p.reserve = w.reserve; p.reloading = false;
       gs.events.push({ type: 'msg', text: '✓ ' + w.name });
       return;
     }
   }
-  gs.events.push({ type: 'msg', text: "AVVICINATI A UN'ARMA" });
+  gs.events.push({ type: 'msg', text: 'GET CLOSER TO A WEAPON' });
 }
 
 function tryPickup(gs, p) {
@@ -123,7 +123,7 @@ const PERK_LABELS = { damage: 'DMG×2', speed: 'SPEED', nuke: 'NUKE' };
 function applyDrop(gs, p, d) {
   if (d.type === 'ammo') {
     const w = WEAPONS[p.wIdx]; const g = Math.min(d.amount, w.reserve - p.reserve);
-    p.reserve += g; gs.events.push({ type: 'msg', text: '+' + g + ' MUNIZIONI' });
+    p.reserve += g; gs.events.push({ type: 'msg', text: '+' + g + ' AMMO' });
   } else if (d.type === 'health') {
     const g = Math.min(20, p.maxHp - p.hp); p.hp += g; gs.events.push({ type: 'msg', text: '+' + g + ' HP' });
   } else if (d.type === 'perk') {
@@ -246,7 +246,7 @@ export function stepSim(gs, dt) {
     if (gs.betTimer <= 0) {
       gs.between = false;
       const count = gs.wave * 5; gs.zombTotal = count; gs.zombLeft = count; gs.spawnQ = count; gs.spawnT = 0;
-      gs.events.push({ type: 'ann', text: 'WAVE ' + gs.wave, sub: count + ' ZOMBIE' });
+      gs.events.push({ type: 'ann', text: 'WAVE ' + gs.wave, sub: count + ' ZOMBIES' });
     }
   }
   if (!gs.between && gs.spawnQ > 0) {
@@ -257,7 +257,7 @@ export function stepSim(gs, dt) {
     gs.between = true; gs.betTimer = 5; gs.wave++;
     gs.zombies = []; gs.bullets = [];
     gs.players.forEach(p => { if (!p.alive) return; const w = WEAPONS[p.wIdx]; p.reserve = Math.min(p.reserve + Math.floor(w.reserve * .25), w.reserve); });
-    gs.events.push({ type: 'ann', text: 'WAVE ' + (gs.wave - 1) + ' COMPLETATA!', sub: 'Prossima in 5s...' });
+    gs.events.push({ type: 'ann', text: 'WAVE ' + (gs.wave - 1) + ' COMPLETE!', sub: 'Next in 5s...' });
   }
 
   if (!gs.gameOver && gs.players.length > 0 && gs.players.every(p => !p.alive && p.lives <= 0)) {
