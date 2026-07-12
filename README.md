@@ -55,11 +55,22 @@ messages (reload/buy/pickup/reset-position). This means:
 - Every player in a room sees the same zombies, waves, and hits — nothing is
   simulated independently per-client and then patched over.
 - A client can't fake a kill, a pickup, or its own score; the server decides.
-- There's no client-side prediction for movement, so you'll feel your ping
-  (typically negligible on a LAN or same-region deploy). If a snappier feel
-  is wanted later, local prediction of your own player's position with
-  server reconciliation would be the next step — not implemented here to
-  keep the netcode simple and easy to reason about.
+
+Two techniques keep this feeling smooth despite the 20Hz tick and network
+latency, both client-side only — the server's authority is unaffected either way:
+
+- **Client-side prediction** (`public/js/main.js`): your own player moves
+  immediately from local input using the exact same physics the server uses
+  (`playerSpeed()` + `slide()` from `shared/`), instead of waiting a round
+  trip to see yourself move. It's continuously reconciled against the
+  server's confirmed position for you — small drift is smoothed out over a
+  few frames, a large gap (respawn, a hit you didn't predict) snaps instantly.
+- **Snapshot interpolation** (`public/js/interp.js`): zombies, bullets, and
+  other players are rendered ~100ms behind real time, interpolated between
+  the two actual snapshots that bracket that moment (matched by stable
+  entity id), rather than jumping to a new position every ~50ms tick. This
+  is the same "delayed interpolation" approach used by most
+  server-authoritative multiplayer games.
 
 Purely cosmetic effects (blood, corpses, particles, screen flash, banners)
 are never part of the synced game state — the sim emits lightweight events
