@@ -15,8 +15,13 @@ server/     Node WebSocket server. Authoritative for multiplayer: it
             simulates every room's game and broadcasts state; clients only
             ever send input, never gameplay state.
 public/     The browser client — HTML, CSS, and JS modules (rendering,
-            input, audio, lobby/menu UI, networking).
+            input, audio, lobby/menu UI, networking). public/js/config.js
+            holds the one thing that changes between deployments: where
+            the multiplayer server lives.
 ```
+
+`netlify.toml` and `render.yaml` configure the two deploy targets described
+below.
 
 ## Running locally
 
@@ -36,14 +41,37 @@ modules straight from `public/js/*.js` and `shared/*.js`.
 
 ## Deploying
 
+### Option A: single service (simplest)
+
 The server serves the client itself (static files + WebSocket on the same
-HTTP port), so this is a single deployable service — e.g. on Render, Railway,
+HTTP port), so this is one deployable service — e.g. on Render, Railway,
 Fly.io, or any host that runs `npm install && npm start` and exposes one
 port. No separate static hosting or CORS config needed, and no server URL to
 hardcode in the client: it always connects back to whatever origin served the
-page (`wss://` on https, `ws://` on http).
+page (`wss://` on https, `ws://` on http). `render.yaml` is set up for this —
+in the Render dashboard: New → Blueprint → connect this repo.
 
 Set `PORT` if your host requires it; defaults to 3000.
+
+### Option B: split — static client on Netlify, server on Render
+
+Netlify only hosts static files/serverless functions; it can't run the
+always-on process the authoritative game server needs (in-memory room state
++ a per-room tick loop). So this splits the two:
+
+1. Deploy `server/` to Render (or similar) using `render.yaml` as above.
+   Note the resulting URL, e.g. `https://deadzone-final.onrender.com`.
+2. Edit `public/js/config.js` and set `WS_URL` to that URL with a `wss://`
+   scheme, e.g. `export const WS_URL = 'wss://deadzone-final.onrender.com';`.
+   Commit and push.
+3. In Netlify: New site → import this repo. `netlify.toml` is already set
+   up (build command assembles `public/` + `shared/` into a `site/`
+   publish directory, since the client imports `shared/` at the
+   root-relative path `/shared/...`). No other config needed.
+
+The server still serves the client too in this setup (it doesn't know or
+care that Netlify also exists) — that's harmless, just unused when you're
+visiting the Netlify URL.
 
 ## Multiplayer architecture
 

@@ -1,0 +1,12 @@
+# Netlify hosts the static client only — it can't run the always-on
+# WebSocket server (see README's "Deploying" section). This assembles
+# public/ and shared/ (siblings in the repo, but the client's JS imports
+# shared/ at the root-relative path "/shared/...") into one publish dir.
+#
+# Before deploying, set WS_URL in public/js/config.js to your server's
+# wss:// URL (e.g. the Render service from render.yaml) — otherwise the
+# client will try to open a WebSocket back to Netlify itself, which has no
+# server to answer it.
+[build]
+  command = "mkdir -p site && cp -r public/* site/ && cp -r shared site/shared"
+  publish = "site"

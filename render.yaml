@@ -1,0 +1,12 @@
+# Render Blueprint for the multiplayer server. In the Render dashboard:
+# New -> Blueprint -> connect this repo -> Render reads this file automatically.
+# Free tier sleeps after ~15min idle and wakes on the next request/connection
+# (a few seconds' delay), which is fine for a friends game.
+services:
+  - type: web
+    name: deadzone-server
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
